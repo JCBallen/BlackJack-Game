@@ -35,6 +35,9 @@ class Deck:
     def dealCard(self, quantity):
         cards_dealt = []
         for i in range(quantity):
+            # Comprobamos que haya cartas en el deck que sacar, mas que sea 1 :V
+            if len(self.cards) < 1:
+                return "Deck out of cards"   
             # elegimos carta con .pop(), luego la añadimos a la lista de cartas elegidas
             cards_dealt.append(self.cards.pop())
         return cards_dealt
@@ -44,6 +47,9 @@ deck1 = Deck()
 deck2 = Deck()
 deck2.shuffleCards()
 
-print('Deck 1:', deck1.cards)  # deck1 no esya revuelta (no shuffled)
+print('Deck 1:\n', deck1.cards)  # deck1 no esya revuelta (no shuffled)
 # print(deck1.cards[1][1]['value'])  # carta indice 1, el dict de ranks, el valor del rank
-print('Deck 2:', deck2.cards)  # deck2 esta revuelta (suffled)
+print('\nDeck 2:\n', deck2.cards)  # deck2 esta revuelta (suffled)
+
+
+print('\nSacamos 53 cartas del Deck 2:\n', deck2.dealCard(53))  # en el deck hay solo 52 cartas, solo probamos que avise el error
