@@ -44,7 +44,7 @@ cards_picked = dealCard(cards, 3)
 # Miramos/chequeamos que efectivamente las cartas elejidas se hayan "sacado" fuera del deck
 check_if_not_in_deck = map(lambda n: n in cards_picked, cards)   # va preguntando por cada carta si existe esa misma en las pickeadas (True si coincide una carta de las pickeadas con el deck)
 print('Correctamente salieron de la baraja' if any(check_if_not_in_deck) == False else 'Hay cartas repetidas en la baraja') 
-# print(cards)
+# print(check_if_not_in_deck)
 print(cards_picked)
 
 # card1, card2, card3 = cards_picked    # desacoplamos la lista en variables individuales

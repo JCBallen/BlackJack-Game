@@ -1,5 +1,3 @@
-from cgitb import handler
-import enum
 import os
 import random
 
@@ -61,7 +59,8 @@ deck1 = Deck()
 deck2 = Deck()
 deck2.shuffleCards()
 
-print('Deck 1:\n', deck1.cards)  # deck1 no esya revuelta (no shuffled)
+# NOTA: se ven como listas de objetos, si se desea "ver claramente" abajo hay un ejemplo de como visualizarlo 
+print('Deck 1:\n', deck1.cards)  # deck1 no esta revuelta (no shuffled)
 # print(deck1.cards[1][1]['value'])  # carta indice 1, el dict de ranks, el valor del rank
 print('\nDeck 2:\n', deck2.cards)  # deck2 esta revuelta (suffled)
 
@@ -90,7 +89,7 @@ deck5 = Deck()
 deck5.shuffleCards()     # Creamos un nuevo mazo y lo revolvemos
 
 hand1 = Hand()
-hand1.add_card(deck5.dealCard(2))   # Creamos una mano y le damos 2 cartas
+hand1.add_card(deck5.dealCard(2))   # Creamos una mano y le damos 2 cartas (por ser blackjack)
 
 mapaDelDeck = map(lambda n:str(n),deck5.cards)          # Trucoteca para visualizar los objetos dentro de una lista, aprovecahndo el __str__ que le pusimos a Card
 print('\nDeck 5:\n',list(mapaDelDeck))                  # ya que si lo vieramos directamente se ve asi: [<main.object>, <main.object>, <main.object>]    
