@@ -1,6 +1,10 @@
 from ast import Return
+from http.client import REQUEST_URI_TOO_LONG
 import os
 import random
+import re
+from sys import displayhook
+from tabnanny import check
 
 # Clearing the Screen
 os.system('cls')
@@ -46,7 +50,7 @@ class Deck:
             return f'Only {len(self.cards)} card(s) in the deck left'
         random.shuffle(self.cards)
 
-    def dealCard(self, quantity):
+    def dealCard(self, quantity=1):
         cards_dealt = []
         for i in range(quantity):
             # Comprobamos que haya cartas en el deck que sacar, mas que sea 1 :V
@@ -97,20 +101,38 @@ class Hand:
         for card in self.cards:
             if card.rank['rank'] == 'A':
                 hasAce = True                      # avisa si leyo una A
-            self.value += card.rank['value']       # se suma normal, luego lo arreglamos
+            # se suma normal, luego lo arreglamos
+            self.value += card.rank['value']
 
         if hasAce and self.value > 21:       # si existia una A y se pasa de 21, hacemos que solo valga 1, restandole 10
             self.value -= 10
 
     def get_value(self):
-        self.calculate_value()                # retorna el valor de las cartas primero llamando a calculate_value, y ahi si
+        # retorna el valor de las cartas primero llamando a calculate_value, y ahi si
+        self.calculate_value()
         return self.value
 
     def is_blackjack(self):
-        self.get_value()
-        if self.value == 21:
-            return "IT'S A BLACKJACK"
-        return "It's not a BlackJack"
+        val = self.get_value()
+        return True if val == 21 else False
+
+    def display(self, show_all_dealer_cards=False):
+        # Ojo que aqui hay, FStrings, Ternary Operators, Map function, Lambda funcition, Triple Quotes
+        # Los triple quotes permiten que su interior este con cualquier indentacion
+        print(f'''
+{"Dealer's" if self.dealer else "Your"} hand:''')
+        for index, card in enumerate(self.cards):
+            # Recordar que el dealer tiene una carta oculta y la otra visible
+            # si usamos '\' backslash al final de una linea esta continuara en la siguiente
+            # para no tener lineas tan largas
+            if index == 0 and self.dealer \
+                    and not show_all_dealer_cards and not self.is_blackjack():
+                print("*hidden*")
+            else:
+                print(card)
+
+        if not self.dealer:
+            print('\nValue:', self.get_value())
 
 
 # --------------------------------------------------Test
@@ -122,13 +144,122 @@ hand1 = Hand()
 hand1.add_card(deck5.dealCard(2))
 
 # Trucoteca para visualizar los objetos dentro de una lista, aprovecahndo el __str__ que le pusimos a Card
-mapaDelDeck = map(lambda n: str(n), deck5.cards)
 # ya que si lo vieramos directamente se ve asi: [<main.object>, <main.object>, <main.object>]
+mapaDelDeck = map(lambda n: str(n), deck5.cards)
 print('\nDeck 5:\n', list(mapaDelDeck))
 
-mapaDeHand = map(lambda n: str(n), hand1.cards)
-print('\nMano 1:\n', list(mapaDeHand))
+hand1.display()
 
-sumOfHand = hand1.get_value()
-print(f'The sum of the cards is {sumOfHand}')
-print(hand1.is_blackjack())
+# ---------------------------------------------- GAME CLASS
+
+
+class Game:
+    def play(self):
+        game_number = 0
+        games_to_play = 0
+        # Queremos asegurarnos que ingrese un valor numerico mayor a 0
+        while games_to_play <= 0:
+            try:
+                games_to_play = int(
+                    input('How many games do you wanna play? '))           # este lanza error si es string
+                if games_to_play < 0:
+                    # este lanza error si es negativo
+                    raise
+            except Exception as e:
+                print('Must be a positive integer')
+
+        while game_number < games_to_play:
+            game_number += 1
+            main_deck = Deck()
+            main_deck.shuffleCards()   # Creamos y revolvemos las cartas
+
+            player_hand = Hand()      # Creamos las manos
+            dealer_hand = Hand(True)  # Seteamos el dealer to true
+
+            # Repartimos 2 cartas a cada uno
+            player_hand.add_card(main_deck.dealCard(2))
+            dealer_hand.add_card(main_deck.dealCard(2))
+
+            print()
+            print('*' * 30)
+            print(f'Game {game_number} of {games_to_play}')
+            print('*' * 30)
+            player_hand.display()
+            dealer_hand.display()
+
+            # Verificamos que no haya un ganador desde ya la primera reparticion
+            if self.check_winner(player_hand, dealer_hand):
+                continue
+
+            # Si no se dio ganador de primeras procedemos al 'Hit' o 'Stand'
+            choice = ''
+
+            while player_hand.get_value() < 21 and choice not in ['s', 'stand']:
+                # Preguntamos que quiere hacer
+                choice = input('Hit or Stand?').lower()
+                print()
+                while choice not in ['s', 'h', 'stand', 'hit']:
+                    choice = input(
+                        "Type 's' or 'h' or 'stand' or 'hit'").lower()  # Por si se equivoco, le mostramos como debe escribir las opciones
+                    print()
+                if choice in ['hit', 'h']:
+                    # en el metodo dealCard pusimos default 1
+                    player_hand.add_card(main_deck.dealCard())
+                    player_hand.display()
+
+            # Verificamos si hay un ganador ahora
+            if self.check_winner(player_hand, dealer_hand):
+                continue
+
+            player_hand_value = player_hand.get_value()
+            dealer_hand_value = dealer_hand.get_value()
+
+            while dealer_hand_value < 17:                       # el dealer tiene que llegar a 17
+                dealer_hand.add_card(main_deck.dealCard())
+                dealer_hand_value = dealer_hand.get_value()
+
+            dealer_hand.display(show_all_dealer_cards=True)
+
+            # Verificamos si hay un ganador ahora
+            if self.check_winner(player_hand, dealer_hand):
+                continue
+
+            print("Final Results")
+            print("Your Hand:", player_hand_value)
+            print("Dealer's Hand:", dealer_hand_value)
+
+            # Aqui ya deberia haber un ganador asi que no lo ponemos en if y enviamos el game_over=True
+            self.check_winner(player_hand, dealer_hand, True)
+
+        print('\nThank for playing!')
+
+    def check_winner(self, player_hand, dealer_hand, game_over=False):
+        if not game_over:
+            if player_hand.get_value() > 21:
+                print('You Busted, Dealer Wins! 😥')
+                return True
+            if dealer_hand.get_value() > 21:
+                print('Dealer Busted, You Win! 😎')
+                return True
+            if player_hand.get_value() == 21 and dealer_hand.get_value() == 21:
+                print("It's a tie!")
+                return True
+            if player_hand.is_blackjack():
+                print("You have a BlackJack, You Win 😎")
+                return True
+            if dealer_hand.is_blackjack():
+                print("Dealer has BlackJack, Dealer Wins! 😥")
+                return True
+        else:
+            if player_hand.get_value() > dealer_hand.get_value() and player_hand.get_value() <= 21:
+                print('You Win! 😎')
+            elif player_hand.get_value() == dealer_hand.get_value():
+                print("It's a tie!")
+            else:
+                print('Dealer Win! 😥')
+            return True
+        return False
+
+
+g = Game()
+g.play()
