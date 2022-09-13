@@ -1,6 +1,10 @@
-
+from ast import Return
+from http.client import REQUEST_URI_TOO_LONG
 import os
 import random
+import re
+from sys import displayhook
+from tabnanny import check
 
 # Clearing the Screen
 os.system('cls')
@@ -46,7 +50,7 @@ class Deck:
             return f'Only {len(self.cards)} card(s) in the deck left'
         random.shuffle(self.cards)
 
-    def dealCard(self, quantity=1):  # defaut entrega 1 carta
+    def dealCard(self, quantity=1):
         cards_dealt = []
         for i in range(quantity):
             # Comprobamos que haya cartas en el deck que sacar, mas que sea 1 :V
@@ -64,7 +68,8 @@ deck2.shuffleCards()
 
 # NOTA: se ven como listas de objetos, si se desea "ver claramente" abajo hay un ejemplo de como visualizarlo
 # deck1 no esta revuelta (no shuffled) (ya que es una lista de objetos, solo podemos ver 1 objeto bien a la vez, abajo hay un truco para ver todos)
-print('Deck 1:\n', deck1.cards[0], '(Solo mostramos 1 carta del deck)\n')
+print('Deck 1:\n', deck1.cards[0])
+# print(deck1.cards[1][1]['value'])  # carta indice 1, el dict de ranks, el valor del rank
 print('\nDeck 2:\n', deck2.cards)  # deck2 esta revuelta (suffled)
 
 
@@ -73,7 +78,6 @@ numCardsDealt = 53
 print(f'\nSacamos {numCardsDealt} cartas del Deck 2:\n',
       deck2.dealCard(numCardsDealt))
 
-# solo recibe algo cuando hay 1 o menos cartas en el deck
 respond = deck2.shuffleCards()
 
 print('\nShuffle Deck 2:\n', respond, deck2.cards)
@@ -84,14 +88,13 @@ print('\nShuffle Deck 2:\n', respond, deck2.cards)
 class Hand:
     def __init__(self, dealer=False):
         self.cards = []
-        # este valor es la suma de las cartas, cuanto vale su mano
         self.value = 0
         self.dealer = dealer
 
     def add_card(self, card_list):
         self.cards.extend(card_list)
 
-    def get_value(self):     # suma las cartas
+    def calculate_value(self):     # suma las cartas
         self.value = 0
         hasAce = False
 
@@ -104,14 +107,21 @@ class Hand:
         if hasAce and self.value > 21:       # si existia una A y se pasa de 21, hacemos que solo valga 1, restandole 10
             self.value -= 10
 
+<<<<<<< HEAD:mainGame.py
         return self.value                    # retorna el valor de la suma
+=======
+    def get_value(self):
+        # retorna el valor de las cartas primero llamando a calculate_value, y ahi si
+        self.calculate_value()
+        return self.value
+>>>>>>> parent of 6a34360 (files names changed, some changes):classes.py
 
     def is_blackjack(self):
         val = self.get_value()
         return True if val == 21 else False
 
     def display(self, show_all_dealer_cards=False):
-        # Ojo que aqui hay, FStrings, Ternary Operators, Triple Quotes
+        # Ojo que aqui hay, FStrings, Ternary Operators, Map function, Lambda funcition, Triple Quotes
         # Los triple quotes permiten que su interior este con cualquier indentacion
         print(f'''
 {"Dealer's" if self.dealer else "Your"} hand:''')
@@ -134,13 +144,12 @@ deck5 = Deck()
 deck5.shuffleCards()     # Creamos un nuevo mazo y lo revolvemos
 
 hand1 = Hand()
-# Creamos una mano y le damos 2 cartas (asi como en blackjack)
+# Creamos una mano y le damos 2 cartas (por ser blackjack)
 hand1.add_card(deck5.dealCard(2))
 
 # Trucoteca para visualizar los objetos dentro de una lista, aprovecahndo el __str__ que le pusimos a Card
 # ya que si lo vieramos directamente se ve asi: [<main.object>, <main.object>, <main.object>]
 mapaDelDeck = map(lambda n: str(n), deck5.cards)
-# basicamente tomamos la carta y le aplicamos el str(), funciona por el metodo __str__ de la clase Card
 print('\nDeck 5:\n', list(mapaDelDeck))
 
 hand1.display()
