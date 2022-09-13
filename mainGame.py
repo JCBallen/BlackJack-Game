@@ -104,7 +104,7 @@ class Hand:
         if hasAce and self.value > 21:       # si existia una A y se pasa de 21, hacemos que solo valga 1, restandole 10
             self.value -= 10
 
-        return self.value
+        return self.value              # retorna el valor de la suma
 
     def is_blackjack(self):
         val = self.get_value()
@@ -156,7 +156,7 @@ class Game:
         while games_to_play <= 0:
             try:
                 games_to_play = int(
-                    input('How many games do you wanna play? '))           # este lanza error si es string
+                    input('How many games do you wanna play? '))           # este lanza error si es string, por eso lo ponemos en try
                 if games_to_play < 0:
                     # este lanza error si es negativo
                     raise
@@ -175,6 +175,7 @@ class Game:
             player_hand.add_card(main_deck.dealCard(2))
             dealer_hand.add_card(main_deck.dealCard(2))
 
+            # Mostramos todo el game
             print()
             print('*' * 30)
             print(f'Game {game_number} of {games_to_play}')
@@ -184,6 +185,9 @@ class Game:
 
             # Verificamos que no haya un ganador desde ya la primera reparticion
             if self.check_winner(player_hand, dealer_hand):
+                print("Final Results")
+                print("Your Hand:", player_hand_value)
+                print("Dealer's Hand:", dealer_hand_value)
                 continue
 
             # Si no se dio ganador de primeras procedemos al 'Hit' o 'Stand'
@@ -202,9 +206,12 @@ class Game:
                     player_hand.add_card(main_deck.dealCard())
                     player_hand.display()
 
-            # Verificamos si hay un ganador ahora
-            if self.check_winner(player_hand, dealer_hand):
-                continue
+                # Verificamos si hay un ganador ahora
+                if self.check_winner(player_hand, dealer_hand):
+                    print("Final Results")
+                    print("Your Hand:", player_hand_value)
+                    print("Dealer's Hand:", dealer_hand_value)
+                    continue
 
             player_hand_value = player_hand.get_value()
             dealer_hand_value = dealer_hand.get_value()
@@ -213,18 +220,21 @@ class Game:
                 dealer_hand.add_card(main_deck.dealCard())
                 dealer_hand_value = dealer_hand.get_value()
 
+            # cuando termine el while anterior deberia tener mas de 17 y mostrar las cartas
             dealer_hand.display(show_all_dealer_cards=True)
 
             # Verificamos si hay un ganador ahora
-            if self.check_winner(player_hand, dealer_hand):
-                continue
-
-            print("Final Results")
-            print("Your Hand:", player_hand_value)
-            print("Dealer's Hand:", dealer_hand_value)
+            # if self.check_winner(player_hand, dealer_hand):
+            #     print("Final Results")
+            #     print("Your Hand:", player_hand_value)
+            #     print("Dealer's Hand:", dealer_hand_value)
+            #     continue
 
             # Aqui ya deberia haber un ganador asi que no lo ponemos en if y enviamos el game_over=True
             self.check_winner(player_hand, dealer_hand, True)
+            print("Final Results")
+            print("Your Hand:", player_hand.get_value())
+            print("Dealer's Hand:", dealer_hand.get_value())
 
         print('\nThank for playing!')
 
