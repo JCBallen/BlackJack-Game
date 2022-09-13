@@ -156,7 +156,7 @@ class Game:
         while games_to_play <= 0:
             try:
                 games_to_play = int(
-                    input('How many games do you wanna play? '))           # este lanza error si es string
+                    input('How many games do you wanna play? '))           # este lanza error si es string, por eso usamos try
                 if games_to_play < 0:
                     # este lanza error si es negativo
                     raise
