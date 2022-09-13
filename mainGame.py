@@ -185,9 +185,7 @@ class Game:
 
             # Verificamos que no haya un ganador desde ya la primera reparticion
             if self.check_winner(player_hand, dealer_hand):
-                print("Final Results")
-                print("Your Hand:", player_hand_value)
-                print("Dealer's Hand:", dealer_hand_value)
+                self.final_results(player_hand, dealer_hand)
                 continue
 
             # Si no se dio ganador de primeras procedemos al 'Hit' o 'Stand'
@@ -208,9 +206,7 @@ class Game:
 
                 # Verificamos si hay un ganador ahora
                 if self.check_winner(player_hand, dealer_hand):
-                    print("Final Results")
-                    print("Your Hand:", player_hand_value)
-                    print("Dealer's Hand:", dealer_hand_value)
+                    self.final_results(player_hand, dealer_hand)
                     continue
 
             player_hand_value = player_hand.get_value()
@@ -223,47 +219,44 @@ class Game:
             # cuando termine el while anterior deberia tener mas de 17 y mostrar las cartas
             dealer_hand.display(show_all_dealer_cards=True)
 
-            # Verificamos si hay un ganador ahora
-            # if self.check_winner(player_hand, dealer_hand):
-            #     print("Final Results")
-            #     print("Your Hand:", player_hand_value)
-            #     print("Dealer's Hand:", dealer_hand_value)
-            #     continue
-
             # Aqui ya deberia haber un ganador asi que no lo ponemos en if y enviamos el game_over=True
-            self.check_winner(player_hand, dealer_hand, True)
-            print("Final Results")
-            print("Your Hand:", player_hand.get_value())
-            print("Dealer's Hand:", dealer_hand.get_value())
+            self.check_winner(player_hand, dealer_hand)
+            self.final_results(player_hand, dealer_hand)
 
         print('\nThank for playing!')
 
-    def check_winner(self, player_hand, dealer_hand, game_over=False):
-        if not game_over:
-            if player_hand.get_value() > 21:
-                print('You Busted, Dealer Wins! 😥')
-                return True
-            if dealer_hand.get_value() > 21:
-                print('Dealer Busted, You Win! 😎')
-                return True
-            if player_hand.get_value() == 21 and dealer_hand.get_value() == 21:
-                print("It's a tie!")
-                return True
-            if player_hand.is_blackjack():
-                print("You have a BlackJack, You Win 😎")
-                return True
-            if dealer_hand.is_blackjack():
-                print("Dealer has BlackJack, Dealer Wins! 😥")
-                return True
-        else:
-            if player_hand.get_value() > dealer_hand.get_value() and player_hand.get_value() <= 21:
-                print('You Win! 😎')
-            elif player_hand.get_value() == dealer_hand.get_value():
-                print("It's a tie!")
-            else:
-                print('Dealer Win! 😥')
+    def check_winner(self, player_hand, dealer_hand):
+        if player_hand.get_value() > 21:
+            print('You Busted, Dealer Wins! 😥')
             return True
+        if dealer_hand.get_value() > 21:
+            print('Dealer Busted, You Win! 😎')
+            return True
+        if player_hand.get_value() == 21 and dealer_hand.get_value() == 21:
+            print("It's a tie!")
+            return True
+        if player_hand.is_blackjack():
+            print("You have a BlackJack, You Win 😎")
+            return True
+        if dealer_hand.is_blackjack():
+            print("Dealer has BlackJack, Dealer Wins! 😥")
+            return True
+        if player_hand.get_value() > dealer_hand.get_value() and player_hand.get_value() <= 21:
+            print('You Win! 😎')
+            return True
+        if player_hand.get_value() == dealer_hand.get_value():
+            print("It's a tie!")
+            return True
+        if dealer_hand.get_value() > player_hand.get_value() and dealer_hand.get_value() <= 21:
+            print('Dealer Win! 😥')
+            return True
+
         return False
+
+    def final_results(self, player_hand, dealer_hand):
+        print("Final Results")
+        print("Your Hand:", player_hand.get_value())
+        print("Dealer's Hand:", dealer_hand.get_value())
 
 
 g = Game()
