@@ -1,10 +1,6 @@
-from ast import Return
-from http.client import REQUEST_URI_TOO_LONG
+
 import os
 import random
-import re
-from sys import displayhook
-from tabnanny import check
 
 # Clearing the Screen
 os.system('cls')
@@ -50,7 +46,7 @@ class Deck:
             return f'Only {len(self.cards)} card(s) in the deck left'
         random.shuffle(self.cards)
 
-    def dealCard(self, quantity=1):
+    def dealCard(self, quantity=1):  # default entrega 1
         cards_dealt = []
         for i in range(quantity):
             # Comprobamos que haya cartas en el deck que sacar, mas que sea 1 :V
@@ -68,8 +64,7 @@ deck2.shuffleCards()
 
 # NOTA: se ven como listas de objetos, si se desea "ver claramente" abajo hay un ejemplo de como visualizarlo
 # deck1 no esta revuelta (no shuffled) (ya que es una lista de objetos, solo podemos ver 1 objeto bien a la vez, abajo hay un truco para ver todos)
-print('Deck 1:\n', deck1.cards[0])
-# print(deck1.cards[1][1]['value'])  # carta indice 1, el dict de ranks, el valor del rank
+print('Deck 1:\n', deck1.cards[0], '(Solo mostramos 1 carta del deck)\n')
 print('\nDeck 2:\n', deck2.cards)  # deck2 esta revuelta (suffled)
 
 
@@ -79,7 +74,7 @@ print(f'\nSacamos {numCardsDealt} cartas del Deck 2:\n',
       deck2.dealCard(numCardsDealt))
 
 respond = deck2.shuffleCards()
-
+# Solo recibe algo cuando hay 1 o menos cartas en el deck
 print('\nShuffle Deck 2:\n', respond, deck2.cards)
 
 # ---------------------------------------------------- Clase hand
@@ -88,13 +83,14 @@ print('\nShuffle Deck 2:\n', respond, deck2.cards)
 class Hand:
     def __init__(self, dealer=False):
         self.cards = []
+        # este valor es la suma de las cartas, cuanto vale su mano
         self.value = 0
         self.dealer = dealer
 
     def add_card(self, card_list):
         self.cards.extend(card_list)
 
-    def calculate_value(self):     # suma las cartas
+    def get_value(self):     # suma las cartas
         self.value = 0
         hasAce = False
 
@@ -107,21 +103,14 @@ class Hand:
         if hasAce and self.value > 21:       # si existia una A y se pasa de 21, hacemos que solo valga 1, restandole 10
             self.value -= 10
 
-<<<<<<< HEAD:mainGame.py
         return self.value                    # retorna el valor de la suma
-=======
-    def get_value(self):
-        # retorna el valor de las cartas primero llamando a calculate_value, y ahi si
-        self.calculate_value()
-        return self.value
->>>>>>> parent of 6a34360 (files names changed, some changes):classes.py
 
     def is_blackjack(self):
         val = self.get_value()
         return True if val == 21 else False
 
     def display(self, show_all_dealer_cards=False):
-        # Ojo que aqui hay, FStrings, Ternary Operators, Map function, Lambda funcition, Triple Quotes
+        # Ojo que aqui hay, FStrings, Ternary Operators, Triple Quotes
         # Los triple quotes permiten que su interior este con cualquier indentacion
         print(f'''
 {"Dealer's" if self.dealer else "Your"} hand:''')
@@ -144,12 +133,13 @@ deck5 = Deck()
 deck5.shuffleCards()     # Creamos un nuevo mazo y lo revolvemos
 
 hand1 = Hand()
-# Creamos una mano y le damos 2 cartas (por ser blackjack)
+# Creamos una mano y le damos 2 cartas (asi como en blackjack)
 hand1.add_card(deck5.dealCard(2))
 
 # Trucoteca para visualizar los objetos dentro de una lista, aprovecahndo el __str__ que le pusimos a Card
 # ya que si lo vieramos directamente se ve asi: [<main.object>, <main.object>, <main.object>]
 mapaDelDeck = map(lambda n: str(n), deck5.cards)
+# basicamente tomamos obj Card y lo pasamos a string, es posible gracias al metodo __str__ de Card
 print('\nDeck 5:\n', list(mapaDelDeck))
 
 hand1.display()
@@ -172,6 +162,7 @@ class Game:
             except Exception as e:
                 print('Must be a positive integer')
 
+        # Iniciamos los ciclos del juego
         while game_number < games_to_play:
             game_number += 1
             main_deck = Deck()
@@ -184,6 +175,7 @@ class Game:
             player_hand.add_card(main_deck.dealCard(2))
             dealer_hand.add_card(main_deck.dealCard(2))
 
+            # Mostramos todo el game
             print()
             print('*' * 30)
             print(f'Game {game_number} of {games_to_play}')
@@ -193,6 +185,7 @@ class Game:
 
             # Verificamos que no haya un ganador desde ya la primera reparticion
             if self.check_winner(player_hand, dealer_hand):
+                self.final_results(player_hand, dealer_hand)
                 continue
 
             # Si no se dio ganador de primeras procedemos al 'Hit' o 'Stand'
@@ -213,54 +206,51 @@ class Game:
 
             # Verificamos si hay un ganador ahora
             if self.check_winner(player_hand, dealer_hand):
+                self.final_results(player_hand, dealer_hand)
                 continue
 
-            player_hand_value = player_hand.get_value()
-            dealer_hand_value = dealer_hand.get_value()
-
-            while dealer_hand_value < 17:                       # el dealer tiene que llegar a 17
+            # El dealer tiene que llegar a 17
+            while dealer_hand.get_value() < 17:
                 dealer_hand.add_card(main_deck.dealCard())
-                dealer_hand_value = dealer_hand.get_value()
 
             dealer_hand.display(show_all_dealer_cards=True)
 
             # Verificamos si hay un ganador ahora
             if self.check_winner(player_hand, dealer_hand):
+                self.final_results(player_hand, dealer_hand)
                 continue
-
-            print("Final Results")
-            print("Your Hand:", player_hand_value)
-            print("Dealer's Hand:", dealer_hand_value)
 
             # Aqui ya deberia haber un ganador asi que no lo ponemos en if y enviamos el game_over=True
             self.check_winner(player_hand, dealer_hand, True)
+            self.final_results(player_hand, dealer_hand)
+
 
         print('\nThank for playing!')
 
-    def check_winner(self, player_hand, dealer_hand):
-        if player_hand.get_value() > 21:
-            print('You Busted, Dealer Wins! 😥')
-            return True
-        if dealer_hand.get_value() > 21:
-            print('Dealer Busted, You Win! 😎')
-            return True
-        if player_hand.get_value() == 21 and dealer_hand.get_value() == 21:
-            print("It's a tie!")
-            return True
-        if player_hand.is_blackjack():
-            print("You have a BlackJack, You Win 😎")
-            return True
-        if dealer_hand.is_blackjack():
-            print("Dealer has BlackJack, Dealer Wins! 😥")
-            return True
-        if player_hand.get_value() > dealer_hand.get_value() and player_hand.get_value() <= 21:
-            print('You Win! 😎')
-            return True
-        if player_hand.get_value() == dealer_hand.get_value():
-            print("It's a tie!")
-            return True
-        if dealer_hand.get_value() > player_hand.get_value() and dealer_hand.get_value() <= 21:
-            print('Dealer Win! 😥')
+    def check_winner(self, player_hand, dealer_hand, game_over=False):  # game over necesario para darle una continuidad al ciclo, sin este los juegos acabarian automaticamente
+        if not game_over:
+            if player_hand.get_value() > 21:
+                print('You Busted, Dealer Wins! 😥')
+                return True
+            if dealer_hand.get_value() > 21:
+                print('Dealer Busted, You Win! 😎')
+                return True
+            if player_hand.get_value() == 21 and dealer_hand.get_value() == 21:
+                print("It's a tie!")
+                return True
+            if player_hand.is_blackjack():
+                print("You have a BlackJack, You Win 😎")
+                return True
+            if dealer_hand.is_blackjack():
+                print("Dealer has BlackJack, Dealer Wins! 😥")
+                return True
+        else:
+            if player_hand.get_value() > dealer_hand.get_value() and player_hand.get_value() <= 21:
+                print('You Win! 😎')
+            elif player_hand.get_value() == dealer_hand.get_value():
+                print("It's a tie!")
+            else:
+                print('Dealer Win! 😥')
             return True
 
         return False
